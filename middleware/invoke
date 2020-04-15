@@ -1,0 +1,4 @@
+#!/bin/sh
+
+/usr/bin/invoke_app "$@" -C @tool/bin/compucell3d.sh -t compucell3d \
+                         -u compucell3d-4.1.1
