@@ -1,4 +1,4 @@
 #!/bin/sh
 
-/usr/bin/invoke_app "$@" -C @tool/bin/cc3dCOVID19.sh -t cc3dCOVID19 \
+/usr/bin/invoke_app "$@" -C @tool/bin/cc3dCOVID19.sh -t cc3dcovid19 \
                          -u compucell3d-4.1.1
