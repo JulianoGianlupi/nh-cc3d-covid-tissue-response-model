@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#made with the help from Steven Clark
 
 current_directory=$(pwd)
 
@@ -9,7 +10,13 @@ PARENT_DIR="$(dirname "$(pwd)")"
 
 echo ${PARENT_DIR}
 
-TOOL_HOME=/apps/cc3dcovid19/
+scriptPath=$0
+
+binDir=$(dirname ${scriptPath})
+
+TOOL_HOME=$(dirname ${binDir})
+
+#TOOL_HOME=/apps/cc3dcovid19/
 
 echo ${TOOL_HOME}
 
