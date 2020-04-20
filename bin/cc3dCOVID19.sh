@@ -9,6 +9,10 @@ PARENT_DIR="$(dirname "$(pwd)")"
 
 echo ${PARENT_DIR}
 
+TOOL_HOME=/apps/cc3dcovid19/
+
+echo ${TOOL_HOME}
+
 # necessary to enforce standard convention for numeric values specification on non-English OS
 export LC_NUMERIC="C.UTF-8"
 
@@ -18,9 +22,9 @@ USER_DEMO_PATH=$HOME/CompuCell3D_Demos/${CC3D_DEMO_NAME}
 echo ${USER_DEMO_PATH}
 
 #MAIN_CC3D_FILES=${current_directory}:/../main/
-MAIN_CC3D_FILES=${PARENT_DIR}/main/
+#MAIN_CC3D_FILES=${PARENT_DIR}/main/
 #MAIN_CC3D_FILES=${PARENT_DIR}main/
-
+MAIN_CC3D_FILES=${TOOL_HOME}main/
 echo ${MAIN_CC3D_FILES}
 
 mkdir -p ${USER_DEMO_PATH}
