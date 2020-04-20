@@ -31,7 +31,7 @@ echo ${USER_DEMO_PATH}
 #MAIN_CC3D_FILES=${current_directory}:/../main/
 #MAIN_CC3D_FILES=${PARENT_DIR}/main/
 #MAIN_CC3D_FILES=${PARENT_DIR}main/
-MAIN_CC3D_FILES=${TOOL_HOME}main/
+MAIN_CC3D_FILES=${TOOL_HOME}/main/
 echo ${MAIN_CC3D_FILES}
 
 mkdir -p ${USER_DEMO_PATH}
