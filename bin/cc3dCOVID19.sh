@@ -30,6 +30,6 @@ echo ${MAIN_CC3D_FILES}
 mkdir -p ${USER_DEMO_PATH}
 mkdir -p ${USER_DEMO_PATH}/output/
 
-cp -rf ${MAIN_CC3D_FILES}.  ${USER_DEMO_PATH} #not checking for existance incase there's been an update
+cp -rf ${MAIN_CC3D_FILES}  ${USER_DEMO_PATH} #not checking for existance incase there's been an update
 
 ${COMPUCELL3D_HOME}/compucell3d.sh -i ${USER_DEMO_PATH}/${CC3D_DEMO_FILENAME} -o ${USER_DEMO_PATH}/output/ -f 10001 > /dev/null 2>&1 
