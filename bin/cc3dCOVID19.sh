@@ -1,6 +1,5 @@
 #!/bin/sh
 
-use compucell3d-4.1.1
 
 current_directory=$(pwd)
 
