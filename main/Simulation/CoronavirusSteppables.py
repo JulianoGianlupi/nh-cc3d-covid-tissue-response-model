@@ -614,20 +614,20 @@ class SimDataSteppable(SteppableBasePy):
         self.ir_data_path = None
 
         self.plot_vrm_data = plot_vrm_data_freq > 0
-        self.write_vrm_data = write_vrm_data_freq > 0
+        self.write_vrm_data = False#write_vrm_data_freq > 0
 
         self.plot_vim_data = plot_vim_data_freq > 0
-        self.write_vim_data = write_vim_data_freq > 0
+        self.write_vim_data = False#write_vim_data_freq > 0
 
         self.plot_pop_data = plot_pop_data_freq > 0
-        self.write_pop_data = write_pop_data_freq > 0
+        self.write_pop_data = False#write_pop_data_freq > 0
 
         self.plot_med_viral_data = plot_med_viral_data_freq > 0
-        self.write_med_viral_data = write_med_viral_data_freq > 0
+        self.write_med_viral_data = False#write_med_viral_data_freq > 0
         self.med_viral_key = "MedViral"
 
         self.plot_ir_data = plot_ir_data_freq > 0
-        self.write_ir_data = write_ir_data_freq > 0
+        self.write_ir_data = False#write_ir_data_freq > 0
         self.ir_key = "ImmuneResp"
         self.ir_steppable = None
 
@@ -699,31 +699,32 @@ class SimDataSteppable(SteppableBasePy):
 
         # Check that output directory is available
         if self.output_dir is not None:
-            from pathlib import Path
-            if self.write_vrm_data:
-                self.vrm_data_path = Path(self.output_dir).joinpath('vrm_data.dat')
-                with open(self.vrm_data_path, 'w'):
-                    pass
+            pass
+            #from pathlib import Path
+            #if self.write_vrm_data:
+            #    self.vrm_data_path = Path(self.output_dir).joinpath('vrm_data.dat')
+            #    with open(self.vrm_data_path, 'w'):
+            #        pass
 
-            if self.write_vim_data:
-                self.vim_data_path = Path(self.output_dir).joinpath('vim_data.dat')
-                with open(self.vim_data_path, 'w'):
-                    pass
+            #if self.write_vim_data:
+            #    self.vim_data_path = Path(self.output_dir).joinpath('vim_data.dat')
+            #    with open(self.vim_data_path, 'w'):
+            #        pass
 
-            if self.write_pop_data:
-                self.pop_data_path = Path(self.output_dir).joinpath('pop_data.dat')
-                with open(self.pop_data_path, 'w'):
-                    pass
+            #if self.write_pop_data:
+            #    self.pop_data_path = Path(self.output_dir).joinpath('pop_data.dat')
+            #    with open(self.pop_data_path, 'w'):
+            #        pass
 
-            if self.write_med_viral_data:
-                self.med_viral_data_path = Path(self.output_dir).joinpath('med_viral_data.dat')
-                with open(self.med_viral_data_path, 'w'):
-                    pass
+            #if self.write_med_viral_data:
+            #    self.med_viral_data_path = Path(self.output_dir).joinpath('med_viral_data.dat')
+            #    with open(self.med_viral_data_path, 'w'):
+            #        pass
 
-            if self.write_ir_data:
-                self.ir_data_path = Path(self.output_dir).joinpath('ir_data.dat')
-                with open(self.ir_data_path, 'w'):
-                    pass
+            #if self.write_ir_data:
+            #    self.ir_data_path = Path(self.output_dir).joinpath('ir_data.dat')
+            #    with open(self.ir_data_path, 'w'):
+            #        pass
 
     def step(self, mcs):
 
@@ -733,11 +734,11 @@ class SimDataSteppable(SteppableBasePy):
         plot_vrm_data = self.plot_vrm_data and mcs % plot_vrm_data_freq == 0
         plot_vim_data = self.plot_vim_data and mcs % plot_vim_data_freq == 0
         if self.output_dir is not None:
-            write_pop_data = self.write_pop_data and mcs % write_pop_data_freq == 0
-            write_med_viral_data = self.write_med_viral_data and mcs % write_med_viral_data_freq == 0
-            write_ir_data = self.write_ir_data and mcs % write_ir_data_freq == 0
-            write_vrm_data = self.write_vrm_data and mcs % write_vrm_data_freq == 0
-            write_vim_data = self.write_vim_data and mcs % write_vim_data_freq == 0
+            write_pop_data = False#self.write_pop_data and mcs % write_pop_data_freq == 0
+            write_med_viral_data = False#self.write_med_viral_data and mcs % write_med_viral_data_freq == 0
+            write_ir_data = False#self.write_ir_data and mcs % write_ir_data_freq == 0
+            write_vrm_data = False#self.write_vrm_data and mcs % write_vrm_data_freq == 0
+            write_vim_data = False#self.write_vim_data and mcs % write_vim_data_freq == 0
         else:
             write_pop_data = False
             write_med_viral_data = False
@@ -755,15 +756,16 @@ class SimDataSteppable(SteppableBasePy):
                 self.vrm_data_win.add_data_point("Secretion", mcs, self.vrm_tracked_cell.dict['Secretion'])
 
             if write_vrm_data:
-                with open(self.vrm_data_path, 'a') as fout:
-                    fout.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(mcs,
-                                                                         self.vrm_tracked_cell.id,
-                                                                         self.vrm_tracked_cell.dict['Unpacking'],
-                                                                         self.vrm_tracked_cell.dict['Replicating'],
-                                                                         self.vrm_tracked_cell.dict['Packing'],
-                                                                         self.vrm_tracked_cell.dict['Assembled'],
-                                                                         self.vrm_tracked_cell.dict['Uptake'],
-                                                                         self.vrm_tracked_cell.dict['Secretion']))
+                pass
+                #with open(self.vrm_data_path, 'a') as fout:
+                #    fout.write('{}, {}, {}, {}, {}, {}, {}, {}\n'.format(mcs,
+                #                                                         self.vrm_tracked_cell.id,
+                #                                                         self.vrm_tracked_cell.dict['Unpacking'],
+                #                                                         self.vrm_tracked_cell.dict['Replicating'],
+                #                                                         self.vrm_tracked_cell.dict['Packing'],
+                #                                                         self.vrm_tracked_cell.dict['Assembled'],
+                #                                                         self.vrm_tracked_cell.dict['Uptake'],
+                #                                                         self.vrm_tracked_cell.dict['Secretion']))
 
         if self.vrm_tracked_cell is not None and (plot_vim_data or write_vim_data):
             if plot_vim_data:
@@ -771,11 +773,12 @@ class SimDataSteppable(SteppableBasePy):
                 self.vim_data_win.add_data_point("VR", mcs, self.vrm_tracked_cell.dict['Surface_Complexes'])
 
             if write_vim_data:
-                with open(self.vim_data_path, 'a') as fout:
-                    fout.write('{}, {}, {}, {}\n'.format(mcs,
-                                                         self.vrm_tracked_cell.id,
-                                                         self.vrm_tracked_cell.dict['Unbound_Receptors'],
-                                                         self.vrm_tracked_cell.dict['Surface_Complexes']))
+                pass
+                #with open(self.vim_data_path, 'a') as fout:
+                #    fout.write('{}, {}, {}, {}\n'.format(mcs,
+                #                                         self.vrm_tracked_cell.id,
+                #                                         self.vrm_tracked_cell.dict['Unbound_Receptors'],
+                #                                         self.vrm_tracked_cell.dict['Surface_Complexes']))
 
         if plot_pop_data or write_pop_data:
 
@@ -801,13 +804,14 @@ class SimDataSteppable(SteppableBasePy):
 
             # Write population data to file if requested
             if write_pop_data:
-                with open(self.pop_data_path, 'a') as fout:
-                    fout.write('{}, {}, {}, {}, {}, {}\n'.format(mcs,
-                                                                 num_cells_uninfected,
-                                                                 num_cells_infected,
-                                                                 num_cells_infectedsecreting,
-                                                                 num_cells_dying,
-                                                                 num_cells_immune))
+                pass
+                #with open(self.pop_data_path, 'a') as fout:
+                 #   fout.write('{}, {}, {}, {}, {}, {}\n'.format(mcs,
+                  #                                               num_cells_uninfected,
+                   #                                              num_cells_infected,
+                    #                                             num_cells_infectedsecreting,
+                     #                                            num_cells_dying,
+                      #                                           num_cells_immune))
 
         if plot_med_viral_data or write_med_viral_data:
 
@@ -822,8 +826,9 @@ class SimDataSteppable(SteppableBasePy):
 
             # Write total diffusive viral amount if requested
             if write_med_viral_data:
-                with open(self.med_viral_data_path, 'a') as fout:
-                    fout.write('{}, {}\n'.format(mcs, med_viral_total))
+                pass
+                #with open(self.med_viral_data_path, 'a') as fout:
+                 #   fout.write('{}, {}\n'.format(mcs, med_viral_total))
 
         if plot_ir_data or write_ir_data:
             if self.ir_steppable is None:
@@ -839,8 +844,9 @@ class SimDataSteppable(SteppableBasePy):
 
             # Write state variable S if requested
             if write_ir_data:
-                with open(self.ir_data_path, 'a') as fout:
-                    fout.write('{}, {}\n'.format(mcs, s_val))
+                pass
+                #with open(self.ir_data_path, 'a') as fout:
+                 #   fout.write('{}, {}\n'.format(mcs, s_val))
 
     def set_vrm_tracked_cell(self, cell):
         self.vrm_tracked_cell = cell
