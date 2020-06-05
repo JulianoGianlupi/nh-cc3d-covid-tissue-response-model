@@ -931,7 +931,10 @@ class SlidersSteppable(SteppableBasePy):
         self.add_steering_param(name='k_on multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
         self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
         self.add_steering_param(name='r_max multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
-
+    def process_steering_panel_data(self):
+        k_on = self.get_steering_param('k_on multiplier')
+        beta = self.get_steering_param('beta delay multiplier')
+        r_max = self.get_steering_param('r_max multiplier')
     def start(self):
         print("SlidersSteppable: This function is called once before simulation")
 
