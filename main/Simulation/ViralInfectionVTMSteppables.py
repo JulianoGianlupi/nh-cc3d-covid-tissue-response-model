@@ -15,6 +15,7 @@ import math
 
 from cc3d.core.PySteppables import *
 import numpy as np
+import time
 
 rng = np.random  # alias for random number generators (rng)
 
@@ -938,40 +939,31 @@ class SlidersSteppable(SteppableBasePy):
         self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.01, 0.1, 1., 10.], widget_name='combobox')
         self.add_steering_param(name='r_max multiplier', val=1.,
                                 enum=[0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0], widget_name='combobox')
+        # self.add_steering_param(name='Initial values set', val=False, enum=[False, True], widget_name='combobox')
 
     def process_steering_panel_data(self):
         self.shared_steppable_vars['k_on'] = kon * self.get_steering_param('k_on multiplier')
         self.shared_steppable_vars['beta_delay'] = ir_delay_coeff * self.get_steering_param('beta delay multiplier')
         self.shared_steppable_vars['r_max'] = replicating_rate * self.get_steering_param('r_max multiplier')
 
-        print('Selected a  parameter = ', self.steering_param_dirty())
-
-        self.changed = self.steering_param_dirty()
+        # self.changed = self.steering_param_dirty()
+        # self.changed = self.get_steering_param('Initial values set')
 
         #     self.update_rmax()
-    # def update_rmax(self):
-    #     for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTEDSECRETING, self.INFECTED):
-    #         self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
-    #                                           unpacking_rate=unpacking_rate,
-    #                                           replicating_rate=self.shared_steppable_vars['r_max'],
-    #                                           r_half=r_half,
-    #                                           translating_rate=translating_rate,
-    #                                           packing_rate=packing_rate,
-    #                                           secretion_rate=secretion_rate)
+
+    def update_rmax(self):
+        for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTEDSECRETING, self.INFECTED):
+            cell.sbml.viralReplication['replicating_rate'] = self.shared_steppable_vars['r_max']
 
     def start(self):
-        # print("SlidersSteppable: This function is called once before simulation")
-        # self.shared_steppable_vars[ViralInfectionVTMLib.vim_steppable_key] = self
-
-
-
-
         pass
+
     def step(self, mcs):
-        if mcs == 0:
-            self.changed = False
-            while not self.changed:
-                self.process_steering_panel_data()
+        # if mcs == 0:
+        #     self.changed = False
+        #     while not self.changed:
+        #         # self.process_steering_panel_data()
+        #         time.sleep(0.1)
         pass
 
     def finish(self):
