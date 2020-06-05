@@ -920,3 +920,25 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
     def finish(self):
         # this function may be called at the end of simulation - used very infrequently though
         return
+        
+class SlidersSteppable(SteppableBasePy):
+    def __init__(self, frequency=1):
+        SteppableBasePy.__init__(self, frequency)
+        
+
+    def start(self):
+
+        print("SlidersSteppable: This function is called once before simulation")
+
+
+    def step(self, mcs):
+        print("SlidersSteppable: This function is called every 1 MCS")
+
+        for cell in self.cell_list:
+            print("CELL ID=",cell.id, " CELL TYPE=",cell.type," volume=",cell.volume)
+
+
+    def finish(self):
+        # this function may be called at the end of simulation - used very infrequently though
+        return
+

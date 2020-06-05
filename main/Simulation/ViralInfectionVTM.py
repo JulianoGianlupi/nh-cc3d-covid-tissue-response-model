@@ -54,4 +54,9 @@ from ViralInfectionVTMSteppables import oxidationAgentModelSteppable
 
 CompuCellSetup.register_steppable(steppable=oxidationAgentModelSteppable(frequency=1))
 
+
+        
+from ViralInfectionVTMSteppables import SlidersSteppable
+CompuCellSetup.register_steppable(steppable=SlidersSteppable(frequency=1))
+
 CompuCellSetup.run()
