@@ -932,9 +932,6 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
 class SlidersSteppable(SteppableBasePy):
     def __init__(self, frequency=1):
         SteppableBasePy.__init__(self, frequency)
-        # self.shared_steppable_vars['k_on'] = kon
-        self.shared_steppable_vars['new_beta'] = 1
-        self.shared_steppable_vars['new_r'] = 1
 
     def add_steering_panel(self):
         self.add_steering_param(name='k_on multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
@@ -945,12 +942,35 @@ class SlidersSteppable(SteppableBasePy):
         self.shared_steppable_vars['k_on'] = kon * self.get_steering_param('k_on multiplier')
         self.shared_steppable_vars['beta_delay'] = ir_delay_coeff * self.get_steering_param('beta delay multiplier')
         self.shared_steppable_vars['r_max'] = replicating_rate * self.get_steering_param('r_max multiplier')
-        
+
+        print('Selected a  parameter = ', self.steering_param_dirty())
+
+        self.changed = self.steering_param_dirty()
+
+        #     self.update_rmax()
+    # def update_rmax(self):
+    #     for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTEDSECRETING, self.INFECTED):
+    #         self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
+    #                                           unpacking_rate=unpacking_rate,
+    #                                           replicating_rate=self.shared_steppable_vars['r_max'],
+    #                                           r_half=r_half,
+    #                                           translating_rate=translating_rate,
+    #                                           packing_rate=packing_rate,
+    #                                           secretion_rate=secretion_rate)
 
     def start(self):
-        print("SlidersSteppable: This function is called once before simulation")
+        # print("SlidersSteppable: This function is called once before simulation")
+        # self.shared_steppable_vars[ViralInfectionVTMLib.vim_steppable_key] = self
 
+
+
+
+        pass
     def step(self, mcs):
+        if mcs == 0:
+            self.changed = False
+            while not self.changed:
+                self.process_steering_panel_data()
         pass
 
     def finish(self):
