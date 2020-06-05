@@ -934,9 +934,10 @@ class SlidersSteppable(SteppableBasePy):
         SteppableBasePy.__init__(self, frequency)
 
     def add_steering_panel(self):
-        self.add_steering_param(name='k_on multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
-        self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
-        self.add_steering_param(name='r_max multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='k_on multiplier', val=1., enum=[0.01, 0.1, 1., 10., 100.], widget_name='combobox')
+        self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.01, 0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='r_max multiplier', val=1.,
+                                enum=[0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1.0], widget_name='combobox')
 
     def process_steering_panel_data(self):
         self.shared_steppable_vars['k_on'] = kon * self.get_steering_param('k_on multiplier')
