@@ -890,6 +890,7 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
     """
     Implements immune cell oxidizing agent cytotoxicity module
     """
+
     def __init__(self, frequency=1):
         SteppableBasePy.__init__(self, frequency)
         if track_model_variables:
@@ -920,25 +921,26 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
     def finish(self):
         # this function may be called at the end of simulation - used very infrequently though
         return
-        
+
+
 class SlidersSteppable(SteppableBasePy):
     def __init__(self, frequency=1):
         SteppableBasePy.__init__(self, frequency)
-        
+
+    def add_steering_panel(self):
+        self.add_steering_param(name='k_on multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='r_max multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
 
     def start(self):
-
         print("SlidersSteppable: This function is called once before simulation")
-
 
     def step(self, mcs):
         print("SlidersSteppable: This function is called every 1 MCS")
 
         for cell in self.cell_list:
-            print("CELL ID=",cell.id, " CELL TYPE=",cell.type," volume=",cell.volume)
-
+            print("CELL ID=", cell.id, " CELL TYPE=", cell.type, " volume=", cell.volume)
 
     def finish(self):
         # this function may be called at the end of simulation - used very infrequently though
         return
-
