@@ -41,6 +41,8 @@ class CellsInitializerSteppable(ViralInfectionVTMSteppableBasePy):
         self.get_xml_element('virus_dc').cdata = virus_dc
         self.get_xml_element('virus_decay').cdata = virus_decay
 
+        self.shared_steppable_vars['r_max'] = replicating_rate
+
         for x in range(0, self.dim.x, int(cell_diameter)):
             for y in range(0, self.dim.y, int(cell_diameter)):
                 cell = self.new_uninfected_cell_in_time()
@@ -50,7 +52,7 @@ class CellsInitializerSteppable(ViralInfectionVTMSteppableBasePy):
                 cell.dict['Receptors'] = initial_unbound_receptors
                 self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
                                                   unpacking_rate=unpacking_rate,
-                                                  replicating_rate=replicating_rate,
+                                                  replicating_rate=self.shared_steppable_vars['r_max'],
                                                   r_half=r_half,
                                                   translating_rate=translating_rate,
                                                   packing_rate=packing_rate)
@@ -62,7 +64,7 @@ class CellsInitializerSteppable(ViralInfectionVTMSteppableBasePy):
 
         self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
                                           unpacking_rate=unpacking_rate,
-                                          replicating_rate=replicating_rate,
+                                          replicating_rate=self.shared_steppable_vars['r_max'],
                                           r_half=r_half,
                                           translating_rate=translating_rate,
                                           packing_rate=packing_rate,
@@ -154,6 +156,7 @@ class ViralInternalizationSteppable(ViralInfectionVTMSteppableBasePy):
     def start(self):
         # Post reference to self
         self.shared_steppable_vars[ViralInfectionVTMLib.vim_steppable_key] = self
+        self.shared_steppable_vars['k_on'] = kon
 
     def step(self, mcs):
         pass
@@ -162,7 +165,7 @@ class ViralInternalizationSteppable(ViralInfectionVTMSteppableBasePy):
         if cell.dict['Receptors'] == 0:
             return False, 0.0
 
-        _k = kon * cell.volume / koff
+        _k = self.shared_steppable_vars['k_on'] * cell.volume / koff
         diss_coeff_uptake_pr = math.sqrt(initial_unbound_receptors / 2.0 / _k / cell.dict['Receptors'])
         uptake_probability = nCoVUtils.hill_equation(viral_amount_com,
                                                      diss_coeff_uptake_pr,
@@ -176,7 +179,7 @@ class ViralInternalizationSteppable(ViralInfectionVTMSteppableBasePy):
             cell.dict['ck_production'] = max_ck_secrete_infect
             self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
                                               unpacking_rate=unpacking_rate,
-                                              replicating_rate=replicating_rate,
+                                              replicating_rate=self.shared_steppable_vars['r_max'],
                                               r_half=r_half,
                                               translating_rate=translating_rate,
                                               packing_rate=packing_rate,
@@ -808,6 +811,8 @@ class ImmuneRecruitmentSteppable(ViralInfectionVTMSteppableBasePy):
         # Post reference to self
         self.shared_steppable_vars[ViralInfectionVTMLib.ir_steppable_key] = self
 
+        self.shared_steppable_vars['beta_delay'] = ir_delay_coeff
+
         # Initialize model
         self.__init_fresh_recruitment_model()
 
@@ -831,7 +836,8 @@ class ImmuneRecruitmentSteppable(ViralInfectionVTMSteppableBasePy):
         # Generate solver instance
         model_string = ViralInfectionVTMLib.immune_recruitment_model_string(ir_add_coeff,
                                                                             ir_subtract_coeff,
-                                                                            ir_delay_coeff,
+                                                                            # ir_delay_coeff,
+                                                                            self.shared_steppable_vars['beta_delay'],
                                                                             ir_decay_coeff)
         self.add_free_floating_antimony(model_string=model_string,
                                         model_name=ViralInfectionVTMLib.ir_model_name,
@@ -890,6 +896,7 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
     """
     Implements immune cell oxidizing agent cytotoxicity module
     """
+
     def __init__(self, frequency=1):
         SteppableBasePy.__init__(self, frequency)
         if track_model_variables:
@@ -916,6 +923,55 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
             if seen_field >= oxi_death_thr:
                 self.kill_cell(cell=cell)
                 cell.dict['oxi_killed'] = True
+
+    def finish(self):
+        # this function may be called at the end of simulation - used very infrequently though
+        return
+
+
+class SlidersSteppable(SteppableBasePy):
+    def __init__(self, frequency=1):
+        SteppableBasePy.__init__(self, frequency)
+
+    def add_steering_panel(self):
+        self.add_steering_param(name='k_on multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='beta delay multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+        self.add_steering_param(name='r_max multiplier', val=1., enum=[0.1, 1., 10.], widget_name='combobox')
+
+    def process_steering_panel_data(self):
+        self.shared_steppable_vars['k_on'] = kon * self.get_steering_param('k_on multiplier')
+        self.shared_steppable_vars['beta_delay'] = ir_delay_coeff * self.get_steering_param('beta delay multiplier')
+        self.shared_steppable_vars['r_max'] = replicating_rate * self.get_steering_param('r_max multiplier')
+
+        print('Selected a  parameter = ', self.steering_param_dirty())
+
+        self.changed = self.steering_param_dirty()
+
+        #     self.update_rmax()
+    # def update_rmax(self):
+    #     for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTEDSECRETING, self.INFECTED):
+    #         self.load_viral_replication_model(cell=cell, vr_step_size=vr_step_size,
+    #                                           unpacking_rate=unpacking_rate,
+    #                                           replicating_rate=self.shared_steppable_vars['r_max'],
+    #                                           r_half=r_half,
+    #                                           translating_rate=translating_rate,
+    #                                           packing_rate=packing_rate,
+    #                                           secretion_rate=secretion_rate)
+
+    def start(self):
+        # print("SlidersSteppable: This function is called once before simulation")
+        # self.shared_steppable_vars[ViralInfectionVTMLib.vim_steppable_key] = self
+
+
+
+
+        pass
+    def step(self, mcs):
+        if mcs == 0:
+            self.changed = False
+            while not self.changed:
+                self.process_steering_panel_data()
+        pass
 
     def finish(self):
         # this function may be called at the end of simulation - used very infrequently though
