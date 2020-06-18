@@ -904,7 +904,7 @@ class ImmuneRecruitmentSteppable(ViralInfectionVTMSteppableBasePy):
         self.__init_fresh_recruitment_model()
 
     def step(self, mcs):
-
+        self.__rr['delayRate'] = self.shared_steppable_vars['beta_delay']
         # Update total count of immune cells
         num_immune_cells = len(self.cell_list_by_type(self.IMMUNECELL))
 
