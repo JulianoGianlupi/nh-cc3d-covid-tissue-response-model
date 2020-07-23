@@ -2,9 +2,9 @@
 # To cite this model please use the following:
 #
 # T.J. Sego, Josua O. Aponte-Serrano, Juliano Ferrari Gianlupi, Samuel R. Heaps, Kira Breithaupt, Lutz Brusch,
-# James M. Osborne, Ellen M. Quardokus, James A. Glazier,
-# "A modular framework for multiscale multicellular spatial modeling of viral infection, immune response and drug
-# therapy timing and efficacy in epithelial tissues",
+# James M. Osborne, Ellen M. Quardokus, Richard K. Plemper, James A. Glazier,
+# "A modular framework for multiscale, multicellular, spatiotemporal modeling of acute primary viral infection and
+# immune response in epithelial tissues and its application to drug therapy timing and effectiveness",
 # bioRxiv 2020.04.27.064139
 ###############################################################################################################
 
@@ -131,7 +131,7 @@ class ViralReplicationSteppable(ViralInfectionVTMSteppableBasePy):
         self.simdata_steppable.set_vrm_tracked_cell(cell=cell)
 
         # Do viral model
-        for cell in self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING):
             # Step the model for this cell
             ViralInfectionVTMLib.step_sbml_model_cell(cell=cell)
             # Pack state variables into cell dictionary
@@ -139,14 +139,14 @@ class ViralReplicationSteppable(ViralInfectionVTMSteppableBasePy):
 
             # Test for infection secretion
             if cell.dict['Assembled'] > cell_infection_threshold:
-                cell.type = self.INFECTEDSECRETING
+                cell.type = self.VIRUSRELEASING
                 ViralInfectionVTMLib.enable_viral_secretion(cell=cell, secretion_rate=secretion_rate)
 
                 # cytokine params
                 cell.dict['ck_production'] = max_ck_secrete_infect
 
             # Test for cell death
-            if cell.type == self.INFECTEDSECRETING and \
+            if cell.type == self.VIRUSRELEASING and \
                     np.random.random() < nCoVUtils.hill_equation(cell.dict['Assembled'],
                                                                  diss_coeff_uptake_apo,
                                                                  hill_coeff_uptake_apo):
@@ -174,7 +174,7 @@ class ViralInternalizationSteppable(ViralInfectionVTMSteppableBasePy):
             return False, 0.0
 
         _k = self.shared_steppable_vars['k_on'] * cell.volume / koff
-        diss_coeff_uptake_pr = math.sqrt(initial_unbound_receptors / 2.0 / _k / cell.dict['Receptors'])
+        diss_coeff_uptake_pr = (initial_unbound_receptors / 2.0 / _k / cell.dict['Receptors']) ** (1.0 / hill_coeff_uptake_pr)
         uptake_probability = nCoVUtils.hill_equation(viral_amount_com,
                                                      diss_coeff_uptake_pr,
                                                      hill_coeff_uptake_pr)
@@ -225,7 +225,7 @@ class ViralSecretionSteppable(ViralInfectionVTMSteppableBasePy):
                 self.shared_steppable_vars[ViralInfectionVTMLib.vim_steppable_key]
 
         secretor = self.get_field_secretor("Virus")
-        for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTED, self.VIRUSRELEASING):
 
             # Evaluate probability of cell uptake of viral particles from environment
             # If cell isn't infected, it changes type to infected here if uptake occurs
@@ -237,7 +237,7 @@ class ViralSecretionSteppable(ViralInfectionVTMSteppableBasePy):
                 self.vim_steppable.update_cell_receptors(cell=cell, receptors_increment=-cell.dict['Uptake'] * s_to_mcs)
                 ViralInfectionVTMLib.set_viral_replication_cell_uptake(cell=cell, uptake=cell.dict['Uptake'])
 
-            if cell.type == self.INFECTEDSECRETING:
+            if cell.type == self.VIRUSRELEASING:
                 sec_amount = ViralInfectionVTMLib.get_viral_replication_cell_secretion(cell=cell)
                 secretor.secreteInsideCellTotalCount(cell, sec_amount / cell.volume)
 
@@ -258,7 +258,7 @@ class ImmuneCellKillingSteppable(ViralInfectionVTMSteppableBasePy):
                 self.shared_steppable_vars[ViralInfectionVTMLib.simdata_steppable_key]
 
         killed_cells = []
-        for cell in self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING):
             for neighbor, common_surface_area in self.get_cell_neighbor_data_list(cell):
                 if neighbor:
                     if neighbor.type == self.IMMUNECELL:
@@ -270,7 +270,7 @@ class ImmuneCellKillingSteppable(ViralInfectionVTMSteppableBasePy):
         for cell in killed_cells:
             for neighbor, common_surface_area in self.get_cell_neighbor_data_list(cell):
                 if neighbor:
-                    if neighbor.type in [self.INFECTED, self.INFECTEDSECRETING, self.UNINFECTED]:
+                    if neighbor.type in [self.INFECTED, self.VIRUSRELEASING, self.UNINFECTED]:
                         p_bystander_effect = np.random.random()
                         if p_bystander_effect < bystander_effect:
                             self.kill_cell(cell=neighbor)
@@ -475,7 +475,7 @@ class SimDataSteppable(SteppableBasePy):
 
             self.pop_data_win.add_plot("Uninfected", style='Dots', color='blue', size=5)
             self.pop_data_win.add_plot("Infected", style='Dots', color='red', size=5)
-            self.pop_data_win.add_plot("InfectedSecreting", style='Dots', color='green', size=5)
+            self.pop_data_win.add_plot("VirusReleasing", style='Dots', color='green', size=5)
             self.pop_data_win.add_plot("Dying", style='Dots', color='yellow', size=5)
             self.pop_data_win.add_plot("ImmuneCell", style='Dots', color='white', size=5)
             self.pop_data_win.add_plot("ImmuneCellActivated", style='Dots', color='purple', size=5)
@@ -628,7 +628,7 @@ class SimDataSteppable(SteppableBasePy):
             # Gather population data
             num_cells_uninfected = len(self.cell_list_by_type(self.UNINFECTED))
             num_cells_infected = len(self.cell_list_by_type(self.INFECTED))
-            num_cells_infectedsecreting = len(self.cell_list_by_type(self.INFECTEDSECRETING))
+            num_cells_virusreleasing = len(self.cell_list_by_type(self.VIRUSRELEASING))
             num_cells_dying = len(self.cell_list_by_type(self.DYING))
             num_cells_immune = len(self.cell_list_by_type(self.IMMUNECELL))
             num_cells_immune_act = len([c for c in self.cell_list_by_type(self.IMMUNECELL) if c.dict['activated']])
@@ -639,8 +639,8 @@ class SimDataSteppable(SteppableBasePy):
                     self.pop_data_win.add_data_point('Uninfected', mcs, num_cells_uninfected)
                 if num_cells_infected > 0:
                     self.pop_data_win.add_data_point('Infected', mcs, num_cells_infected)
-                if num_cells_infectedsecreting > 0:
-                    self.pop_data_win.add_data_point('InfectedSecreting', mcs, num_cells_infectedsecreting)
+                if num_cells_virusreleasing > 0:
+                    self.pop_data_win.add_data_point('VirusReleasing', mcs, num_cells_virusreleasing)
                 if num_cells_dying > 0:
                     self.pop_data_win.add_data_point('Dying', mcs, num_cells_dying)
                 if num_cells_immune > 0:
@@ -654,7 +654,7 @@ class SimDataSteppable(SteppableBasePy):
                     fout.write('{}, {}, {}, {}, {}, {}, {}\n'.format(mcs,
                                                                      num_cells_uninfected,
                                                                      num_cells_infected,
-                                                                     num_cells_infectedsecreting,
+                                                                     num_cells_virusreleasing,
                                                                      num_cells_dying,
                                                                      num_cells_immune,
                                                                      num_cells_immune_act))
@@ -715,7 +715,7 @@ class SimDataSteppable(SteppableBasePy):
                     for neighbor, common_srf in self.get_cell_neighbor_data_list(cell):
                         if neighbor is not None and neighbor.type in [self.UNINFECTED,
                                                                       self.INFECTED,
-                                                                      self.INFECTEDSECRETING]:
+                                                                      self.VIRUSRELEASING]:
                             dead_srf += common_srf
 
                 dead_comp = dead_srf / dead_vol
@@ -724,7 +724,7 @@ class SimDataSteppable(SteppableBasePy):
             # If no infected cells, distance is -1
             max_infect_dist = -1
             if self.init_infect_pt is None:
-                infected_cell_list = self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING)
+                infected_cell_list = self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING)
                 num_cells_infected = len(infected_cell_list)
                 if num_cells_infected > 0:
                     self.init_infect_pt = [0, 0, 0]
@@ -736,7 +736,7 @@ class SimDataSteppable(SteppableBasePy):
                     self.init_infect_pt[1] /= num_cells_infected
 
             if self.init_infect_pt is not None:
-                for cell in self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING):
+                for cell in self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING):
                     dx = cell.xCOM - self.init_infect_pt[0]
                     dy = cell.yCOM - self.init_infect_pt[1]
                     max_infect_dist = max(max_infect_dist, math.sqrt(dx * dx + dy * dy))
@@ -810,8 +810,7 @@ class CytokineProductionAbsorptionSteppable(ViralInfectionVTMSteppableBasePy):
     def start(self):
         # cytokine diff parameters
         self.get_xml_element('cytokine_dc').cdata = cytokine_dc
-        self.get_xml_element('cytokine_decay').cdata = cytokine_field_decay  # no "natural" decay, only consumption
-        # and "leakage" outside of simulation laticce
+        self.get_xml_element('cytokine_decay').cdata = cytokine_field_decay
 
         for cell in self.cell_list_by_type(self.IMMUNECELL):
             # cytokine production/uptake parameters for immune cells
@@ -819,7 +818,7 @@ class CytokineProductionAbsorptionSteppable(ViralInfectionVTMSteppableBasePy):
             cell.dict['ck_production'] = max_ck_secrete_im
             cell.dict['ck_consumption'] = max_ck_consume
 
-        for cell in self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING):
             cell.dict['ck_production'] = max_ck_secrete_infect
 
         self.ck_secretor = self.get_field_secretor("cytokine")
@@ -833,7 +832,7 @@ class CytokineProductionAbsorptionSteppable(ViralInfectionVTMSteppableBasePy):
         # Track the total amount added and subtracted to the cytokine field
         total_ck_inc = 0.0
 
-        for cell in self.cell_list_by_type(self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.INFECTED, self.VIRUSRELEASING):
             viral_load = ViralInfectionVTMLib.get_assembled_viral_load_inside_cell(cell, vr_step_size)
             produced = cell.dict['ck_production'] * nCoVUtils.hill_equation(viral_load, ec50_infecte_ck_prod, 2)
             res = self.ck_secretor.secreteInsideCellTotalCount(cell, produced / cell.volume)
@@ -1008,7 +1007,7 @@ class oxidationAgentModelSteppable(ViralInfectionVTMSteppableBasePy):
                 if seen_field > oxi_sec_thr:
                     oxi_sec = self.oxi_secretor.secreteInsideCellTotalCount(cell, max_oxi_secrete / cell.volume)
 
-        for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTED, self.INFECTEDSECRETING):
+        for cell in self.cell_list_by_type(self.UNINFECTED, self.INFECTED, self.VIRUSRELEASING):
 
             seen_field = self.total_seen_field(self.field.oxidator, cell)
             if seen_field >= oxi_death_thr:
