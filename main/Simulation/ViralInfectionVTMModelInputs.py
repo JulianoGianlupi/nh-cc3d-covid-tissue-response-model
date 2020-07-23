@@ -23,7 +23,7 @@ plot_pop_data_freq = 10  # Plot population data frequency (disable with 0)
 __param_desc__['write_pop_data_freq'] = 'Write population data to simulation directory frequency'
 write_pop_data_freq = 0  # Write population data to simulation directory frequency (disable with 0)
 __param_desc__['plot_med_diff_data_freq'] = 'Plot total diffusive field amount frequency'
-plot_med_diff_data_freq = 0  # Plot total diffusive field amount frequency (disable with 0)
+plot_med_diff_data_freq = 10  # Plot total diffusive field amount frequency (disable with 0)
 __param_desc__['write_med_diff_data_freq'] = 'Write total diffusive field amount frequency'
 write_med_diff_data_freq = 0  # Write total diffusive field amount frequency (disable with 0)
 __param_desc__['plot_ir_data_freq'] = 'Plot immune recruitment data frequency'
@@ -35,7 +35,7 @@ plot_spat_data_freq = 0  # Plot spatial data frequency (disable with 0)
 __param_desc__['write_spat_data_freq'] = 'Write spatial data to simulation directory frequency'
 write_spat_data_freq = 0  # Write spatial data to simulation directory frequency (disable with 0)
 __param_desc__['plot_death_data_freq'] = 'Plot death data frequency'
-plot_death_data_freq = 0  # Plot death data frequency (disable with 0)
+plot_death_data_freq = 10  # Plot death data frequency (disable with 0)
 __param_desc__['write_death_data_freq'] = 'Write death data to simulation directory frequency'
 write_death_data_freq = 0  # Write death data to simulation directory frequency (disable with 0)
 
