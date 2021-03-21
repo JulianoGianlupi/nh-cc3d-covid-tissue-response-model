@@ -665,10 +665,16 @@ class SimDataSteppable(SteppableBasePy):
             med_viral_total = 0.0
             med_cyt_total = 0.0
             med_oxi_total = 0.0
-            for x, y, z in self.every_pixel():
-                med_viral_total += self.field.Virus[x, y, z]
-                med_cyt_total += self.field.cytokine[x, y, z]
-                med_oxi_total += self.field.oxidator[x, y, z]
+            try:
+                med_viral_total = self.get_field_secretor("Virus").totalFieldIntegral()
+                med_cyt_total = self.get_field_secretor("cytokine").totalFieldIntegral()
+                med_oxi_total = self.get_field_secretor("oxidator").totalFieldIntegral()
+
+            except AttributeError:  # Pre-v4.2.1 CC3D
+                for x, y, z in self.every_pixel():
+                    med_viral_total += self.field.Virus[x, y, z]
+                    med_cyt_total += self.field.cytokine[x, y, z]
+                    med_oxi_total += self.field.oxidator[x, y, z]
 
             # Plot total diffusive viral amount if requested
             if plot_med_diff_data:
