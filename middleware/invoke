@@ -1,6 +1,6 @@
 #!/bin/sh
 
 /usr/bin/invoke_app "$@" -C @tool/bin/cc3dCOVID19.sh -t cc3dcovid19 \
-                         -u compucell3d-4.2.2 \
+                         -u compucell3d-4.2.5 \
                          -w captive \
                          -r none
